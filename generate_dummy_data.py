@@ -1,4 +1,4 @@
-from faker import Faker
+from generate_dummy_data import Faker
 import random
 import mysql.connector
 
@@ -15,7 +15,6 @@ cursor = conn.cursor()
 
 for _ in range(1000):
 
-    id = random.randint(1,100000)
     name = fake.name()
     created_date = fake.date_time()
 
