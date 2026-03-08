@@ -15,13 +15,13 @@ cursor = conn.cursor()
 
 for _ in range(1000):
 
+    id = random.randint(1,100000)
     name = fake.name()
-    email = fake.email()
-    city = fake.city()
+    created_date = fake.date_time()
 
     cursor.execute(
         "INSERT INTO sample_table (id, name, created_date) VALUES (%s,%s,%s)",
-        (name, email, city)
+        (id, name, created_date)
     )
 
 conn.commit()
