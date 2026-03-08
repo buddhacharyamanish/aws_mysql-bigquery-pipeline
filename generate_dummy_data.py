@@ -19,8 +19,8 @@ for _ in range(1000):
     created_date = fake.date_time()
 
     cursor.execute(
-        "INSERT INTO sample_table (id, name, created_date) VALUES (%s,%s,%s)",
-        (id, name, created_date)
+        "INSERT INTO sample_table (name, created_date) VALUES (%s,%s,%s)",
+        (name, created_date)
     )
 
 conn.commit()
