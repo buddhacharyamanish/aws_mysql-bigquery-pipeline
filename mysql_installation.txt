@@ -1,0 +1,75 @@
+Option 1:
+
+Step 1: Download MySQL 5.7 Community Repository
+
+sudo dnf install https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm -y
+
+
+Step 2:Disable MySQL 8 and Enable MySQL 5.7
+
+sudo dnf module disable mysql -y
+
+sudo dnf install mysql-community-server -y
+
+
+Step 3: Start MySQL
+
+sudo systemctl start mysqld
+
+sudo systemctl status mysqld
+
+
+Step 4: Create Temporary Password
+
+Create Temporary Passowrd:
+sudo grep 'temporary password' /var/log/mysqld.log
+
+mysql -u root -p
+
+
+Step 5: Change root password
+
+Change Root Passowrd:
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'NewStrongPassword123!';
+
+exit;
+
+
+Option 2:
+
+
+1) Import the MySQL public key
+
+Run these commands in PuTTY:
+
+sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql
+
+2) Confirm the key is now installed
+
+rpm -qa gpg-pubkey* | head
+
+3) Clean the failed download cache
+
+sudo dnf clean all
+
+4) Try installing again
+
+sudo dnf install mysql-community-server -y
+
+5) Start MySQL and enable auto-start
+
+sudo systemctl start mysqld
+sudo systemctl enable mysqld
+sudo systemctl status mysqld
+
+6) Get the temporary root password
+
+sudo grep 'temporary password' /var/log/mysqld.log
+
+If it still fails (backup safe option)
+
+sudo dnf install mysql-community-server -y --nogpgcheck  --> (Use this only for a short PoC, not production.)
+
+Run steps 1 to 4 and tell me the exact output if it fails again. If it succeeds, tell me what systemctl status mysqld shows. 
+
