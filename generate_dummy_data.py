@@ -1,4 +1,4 @@
-from generate_dummy_data import Faker
+from faker import Faker
 import random
 import mysql.connector
 
