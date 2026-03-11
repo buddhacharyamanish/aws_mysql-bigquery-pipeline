@@ -1,21 +1,24 @@
 MYSQL_CONFIG = {
     "host": "127.0.0.1",
-    "user": "your_mysql_user",
-    "password": "your_mysql_password",
-    "database": "your_database"
+    "user": "sampleuser",
+    "password": "Sample@123",
+    "database": "sampledb"
 }
 
-GCP_PROJECT_ID = "your-gcp-project-id"
-BQ_RAW_DATASET = "raw_mysql"
-BQ_ANALYTICS_DATASET = "analytics"
+GCP_PROJECT_ID = "data-engineering-v1-489004"
+BQ_DATASET = "raw_data"
+
+STATE_FILE = "/home/ec2-user/mysql_bigquery_pipeline/state.json"
 
 TABLES = {
-    "orders": {
-        "watermark_column": "updated_at",
-        "primary_key": "id"
+    "sample_table": {
+        "watermark_type": "timestamp",
+        "watermark_column": "created_date",
+        "columns": ["id", "name", "created_date"]
     },
-    "customers": {
-        "watermark_column": "updated_at",
-        "primary_key": "id"
+    "sample_table2": {
+        "watermark_type": "id",
+        "watermark_column": "id",
+        "columns": ["id", "email", "phoneno"]
     }
 }

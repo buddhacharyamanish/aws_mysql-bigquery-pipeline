@@ -3,5 +3,4 @@ __pycache__/
 logs/
 service_account.json
 *.pyc
-state.json
 .env
