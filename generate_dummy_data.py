@@ -21,10 +21,10 @@ for _ in range(1000):
     phoneno = fake.numerify("04########")
 
 
-    #cursor.execute(
-    #    "INSERT INTO sample_table (name, created_date) VALUES (%s,%s)",
-    #    (name, created_date)
-    #)
+    cursor.execute(
+        "INSERT INTO sample_table (name, created_date) VALUES (%s,%s)",
+        (name, created_date)
+    )
 
     cursor.execute(
         "INSERT INTO sample_table2 (email, phoneno) VALUES (%s,%s)",
