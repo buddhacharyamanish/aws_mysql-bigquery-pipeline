@@ -13,7 +13,7 @@ conn = mysql.connector.connect(
 
 cursor = conn.cursor()
 
-for _ in range(1000):
+for _ in range(2000):
 
     name = fake.name()
     created_date = fake.date_time()
