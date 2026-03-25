@@ -1,6 +1,16 @@
-datapuller/
+#Python Cache
 __pycache__/
-logs/
-service_account.json
 *.pyc
+
+#Logs
+logs/
+
+#Environment
+service_account.json
 .env
+
+#State File(runtime)
+state.json
+
+# Virtual Environment
+datapuller/
