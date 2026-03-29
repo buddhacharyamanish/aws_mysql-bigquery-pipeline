@@ -9,6 +9,9 @@ from google.api_core.exceptions import NotFound
 from config import MYSQL_CONFIG, GCP_PROJECT_ID, BQ_DATASET, STATE_FILE, TABLES
 
 
+#   Watermark i.e. Starting point from where the data is pulled from the MySQL table.
+#   The value is updated everytimne the data is pulled to record the last pulled record.
+
 DEFAULT_STATE_BY_WATERMARK = {
     "timestamp": {"last_loaded_timestamp": "1970-01-01T00:00:00"},
     "id": {"last_loaded_id": 0},
@@ -18,6 +21,8 @@ STATE_KEY_BY_WATERMARK = {
     "timestamp": "last_loaded_timestamp",
     "id": "last_loaded_id",
 }
+
+# MySQL and BigQuery Data type mappings so that the column with the matching Data type is created in BigQuery.
 
 MYSQL_TO_BQ_TYPE = {
     "tinyint": "INT64",
@@ -55,6 +60,7 @@ MYSQL_TO_BQ_TYPE = {
     "longblob": "BYTES",
 }
 
+#   Search for state.json file.
 
 def read_state() -> dict:
     if not os.path.exists(STATE_FILE):
@@ -63,9 +69,12 @@ def read_state() -> dict:
             for table_name, table_config in TABLES.items()
         }
 
+# Read the state.json file to check the position of last pulled record.
+
     with open(STATE_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
+# Write on the state.json file of last pulled record.
 
 def write_state(state: dict) -> None:
     with open(STATE_FILE, "w", encoding="utf-8") as f:
@@ -85,10 +94,13 @@ def get_state_value(table_config: dict, table_state: dict) -> Any:
     default_state = get_default_state(table_config)
     return table_state.get(state_key, default_state[state_key])
 
+#   Data type matching while creating a table column.
 
 def mysql_to_bq_type(mysql_type: str) -> str:
     return MYSQL_TO_BQ_TYPE.get(mysql_type.lower(), "STRING")
 
+
+# Reads the schema of the MySQL table and converts it into BigQuery schema.
 
 def get_mysql_schema(table_name: str) -> list[bigquery.SchemaField]:
     conn = mysql.connector.connect(**MYSQL_CONFIG)
@@ -121,10 +133,12 @@ def get_mysql_schema(table_name: str) -> list[bigquery.SchemaField]:
         bq_type = mysql_to_bq_type(mysql_type)
         mode = "NULLABLE" if is_nullable == "YES" else "REQUIRED"
 
-        schema.append(bigquery.SchemaField(column_name, bq_type, mode=mode))
+        schema.append(bigquery.SchemaField(column_name, bq_type, mode=mode)) ### This will return BigQuery schema list ###
 
     return schema
 
+
+#   Final query to pull data from MySQL table.
 
 def build_query(table_name: str, table_config: dict) -> str:
     watermark_column = table_config["watermark_column"]
@@ -136,6 +150,7 @@ def build_query(table_name: str, table_config: dict) -> str:
         ORDER BY {watermark_column}
     """
 
+#   Reads new rows from the MySQL.
 
 def extract_from_mysql(table_name: str, table_config: dict, table_state: dict) -> pd.DataFrame:
     conn = mysql.connector.connect(**MYSQL_CONFIG)
@@ -160,10 +175,14 @@ def extract_from_mysql(table_name: str, table_config: dict, table_state: dict) -
 
     return df
 
+#   Prepare dataframe before loading into BigQuery.
 
 def prepare_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
+    
+
+    #   Datetime conversion
 
     for col in df.columns:
         lower_col = col.lower()
@@ -175,6 +194,8 @@ def prepare_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     return df.where(pd.notnull(df), None)
 
+#   Ensure the BiqQuery table if exists or not with all needed columns.
+#   If there are new columns created later in MySQL, it is created in this step.
 
 def ensure_bigquery_table(client: bigquery.Client, table_name: str) -> None:
     table_id = f"{GCP_PROJECT_ID}.{BQ_DATASET}.{table_name}"
@@ -200,6 +221,8 @@ def ensure_bigquery_table(client: bigquery.Client, table_name: str) -> None:
         client.create_table(table)
         print(f"Created BigQuery table: {table_id}")
 
+
+#   Pushing MySQL data into BigQuery. 
 
 def load_to_bigquery(table_name: str, df: pd.DataFrame) -> None:
     client = bigquery.Client(project=GCP_PROJECT_ID)
